@@ -55,6 +55,7 @@ const _handleSubmit = (e: any) => {
     .then((res) =>
     {
       console.log(res)
+     setImageUrl(`http://localhost:3000/images/${res.data.filename}`)
     }
     )
   }
@@ -63,15 +64,20 @@ const _handleSubmit = (e: any) => {
     e.preventDefault();
   
     let reader = new FileReader();
-    let file = e.target.files![0];
-  
-    reader.onloadend = () => {
-      setImage(file);
+    let file: File | undefined
+    if( e.target && e.target.files  && e.target.files.length > 0){
+      
+      file = e.target.files[0];
+      reader.onloadend = () => {
 
-      setImageUrl( reader.result as string ) 
+        setImage(file);
+  
+        setImageUrl( reader.result as string ) 
+      }
+    
+      reader.readAsDataURL(file)
     }
   
-    reader.readAsDataURL(file)
   }
   
 

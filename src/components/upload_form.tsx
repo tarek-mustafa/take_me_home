@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-
-
+import axios from "axios"
 
 const Container = styled.div`
     display: flex;
@@ -16,14 +15,14 @@ const Form = styled.form`
 `
 
 const Input = styled.input`
-    font-size: 16px;
+  font-size: 16px;
   outline: 0;
   width: 61%;
   cursor: pointer;
 `
 
 const Button = styled.button`
-    display: flex;
+  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -37,11 +36,27 @@ const Button = styled.button`
 `
 
 const UploadForm: React.FC = () => {
-const [file, setFile] = React.useState<{file: File, imagePreviewUrl: any }>()
+const [image, setImage] = React.useState<File>()
+const [url, setImageUrl] = 
+React.useState<string>()
 
- const  _handleSubmit = (e: any) => {
-    e.preventDefault();
-    console.log('handle uploading-', file);
+const _handleSubmit = (e: any) => {
+  e.preventDefault();
+  
+    const imageFromObj = new FormData()
+    imageFromObj.append("image", image!);
+    const config = {
+      headers: {
+          'content-type': 'multipart/form-data'
+      }
+    };
+
+    axios.post("http://localhost:3000/upload",imageFromObj, config)
+    .then((res) =>
+    {
+      console.log(res)
+    }
+    )
   }
   
     const _handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) =>  {
@@ -51,10 +66,9 @@ const [file, setFile] = React.useState<{file: File, imagePreviewUrl: any }>()
     let file = e.target.files![0];
   
     reader.onloadend = () => {
-      setFile({
-        file: file,
-        imagePreviewUrl: reader.result
-      });
+      setImage(file);
+
+      setImageUrl( reader.result as string ) 
     }
   
     reader.readAsDataURL(file)
@@ -62,8 +76,8 @@ const [file, setFile] = React.useState<{file: File, imagePreviewUrl: any }>()
   
 
   let $imagePreview = null;
-  if (file && file.imagePreviewUrl) {
-    $imagePreview = (<img alt="cat" style={{width: "200px"}} src={file.imagePreviewUrl} />);
+  if (url) {
+    $imagePreview = (<img alt="cat" style={{width: "200px"}} src={url} />);
   } else {
     $imagePreview = (<div >Please select an Image for Preview</div>);
   }
@@ -73,7 +87,8 @@ const [file, setFile] = React.useState<{file: File, imagePreviewUrl: any }>()
     
       < Container>
         <Form onSubmit={(e)=>_handleSubmit(e)}>
-          <Input className="fileInput" 
+          <Input 
+            name="image"
             type="file" 
             onChange={(e)=>_handleImageChange(e)}
             accept="image/*"
